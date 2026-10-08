@@ -1,0 +1,6 @@
+{
+  "name": "Fabsi Fashion Puzzle",
+  "description": "fabsi-র এক্সক্লুসিভ ক্লোথিং পাজল গেম। প্রতি লেভেলে নতুন ফ্যাশন পাজল সমাধান করুন, স্কোর শেয়ার করুন এবং গুগল শিটে লিড সংরক্ষণ করুন।",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
