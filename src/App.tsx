@@ -16,18 +16,33 @@ import { sound } from './utils/sound.ts';
 import { ChevronLeft, ChevronRight, Grid } from 'lucide-react';
 
 export default function App() {
-  // Check if current route is /admin, #admin or ?admin=true
-  const [isAdminRoute, setIsAdminRoute] = useState<boolean>(() => {
+  // Helper to check if current visitor is on admin subdomain or admin path
+  const checkIsAdmin = (): boolean => {
     if (typeof window === 'undefined') return false;
+    const host = window.location.hostname.toLowerCase();
     const path = window.location.pathname.toLowerCase();
     const hash = window.location.hash.toLowerCase();
     const search = window.location.search.toLowerCase();
-    return (
+
+    const href = window.location.href.toLowerCase();
+
+    // 1. Subdomain check: e.g. admin.fabsi.co.uk
+    const isSubdomain =
+      host.startsWith('admin.') ||
+      host.includes('admin') ||
+      href.includes('admin.fabsi.co.uk');
+
+    // 2. Path or query check: /admin, #admin, ?admin=true
+    const isPathOrQuery =
       path.startsWith('/admin') ||
-      hash === '#admin' ||
-      search.includes('admin=true')
-    );
-  });
+      path.includes('/admin') ||
+      hash.includes('admin') ||
+      search.includes('admin');
+
+    return isSubdomain || isPathOrQuery;
+  };
+
+  const [isAdminRoute, setIsAdminRoute] = useState<boolean>(checkIsAdmin);
 
   const [player, setPlayer] = useState<PlayerInfo | null>(null);
   const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(0);
@@ -48,14 +63,7 @@ export default function App() {
   // Listen for hash / popstate changes
   useEffect(() => {
     const handleLocationChange = () => {
-      const path = window.location.pathname.toLowerCase();
-      const hash = window.location.hash.toLowerCase();
-      const search = window.location.search.toLowerCase();
-      setIsAdminRoute(
-        path.startsWith('/admin') ||
-        hash === '#admin' ||
-        search.includes('admin=true')
-      );
+      setIsAdminRoute(checkIsAdmin());
     };
 
     window.addEventListener('popstate', handleLocationChange);
@@ -89,6 +97,12 @@ export default function App() {
     return (
       <AdminPanel
         onBackToGame={() => {
+          if (typeof window !== 'undefined' && window.location.hostname.startsWith('admin.')) {
+            // Redirect to main domain (e.g. from admin.fabsi.co.uk -> fabsi.co.uk)
+            const mainHost = window.location.hostname.replace(/^admin\./, '');
+            window.location.href = `${window.location.protocol}//${mainHost}`;
+            return;
+          }
           if (window.history.pushState) {
             window.history.pushState(null, '', '/');
           } else {
