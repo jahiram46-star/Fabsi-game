@@ -70,10 +70,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onStartGame }) => {
         {/* Minimal Login Card */}
         <div className="bg-white border border-zinc-200 rounded-3xl p-6 sm:p-8 shadow-xs">
           <div className="text-center mb-6">
-            <h1 className="text-2xl font-black text-black tracking-tight uppercase font-['Plus_Jakarta_Sans']">
-              fabsi
-            </h1>
-            <p className="text-xs text-zinc-500 mt-1">
+            <img
+              src="https://fabsi.co.uk/IMG_20260928_111259.png"
+              alt="fabsi"
+              className="h-10 w-auto max-w-[160px] mx-auto mb-2 object-contain select-none"
+            />
+            <p className="text-xs text-zinc-500">
               100 Levels Apparel Puzzle
             </p>
           </div>

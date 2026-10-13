@@ -120,11 +120,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToGame }) => {
       <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
         <div className="w-full max-w-sm bg-white border border-zinc-200 rounded-3xl p-6 shadow-sm">
           <div className="text-center mb-6">
-            <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-zinc-100 flex items-center justify-center text-black">
-              <Lock className="w-6 h-6" />
-            </div>
-            <h2 className="text-xl font-black text-black tracking-tight font-['Plus_Jakarta_Sans']">
-              fabsi Admin Portal
+            <img
+              src="https://fabsi.co.uk/IMG_20260928_111259.png"
+              alt="fabsi"
+              className="h-9 w-auto max-w-[140px] mx-auto mb-3 object-contain select-none"
+            />
+            <h2 className="text-base font-bold text-black tracking-tight font-['Plus_Jakarta_Sans']">
+              Admin Portal
             </h2>
             <p className="text-xs text-zinc-500 mt-1">
               Enter passcode to manage leads & Google Sheet
@@ -182,9 +184,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToGame }) => {
       <header className="bg-white border-b border-zinc-200 sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-xl font-black text-black tracking-tight uppercase">
-              fabsi
-            </span>
+            <img
+              src="https://fabsi.co.uk/IMG_20260928_111259.png"
+              alt="fabsi"
+              className="h-8 w-auto max-w-[130px] object-contain select-none"
+            />
             <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-700">
               Admin Panel
             </span>

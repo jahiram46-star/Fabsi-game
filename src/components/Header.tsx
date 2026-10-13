@@ -26,9 +26,21 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-zinc-200">
       <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Brand Name: Pure Black Text 'fabsi' */}
+        {/* Brand Logo Image */}
         <div className="flex items-center gap-3">
-          <span className="text-2xl sm:text-3xl font-black tracking-tighter text-black uppercase font-['Plus_Jakarta_Sans'] select-none">
+          <img
+            src="https://fabsi.co.uk/IMG_20260928_111259.png"
+            alt="fabsi"
+            className="h-8 sm:h-9 w-auto max-w-[140px] object-contain select-none"
+            onError={(e) => {
+              const target = e.currentTarget;
+              target.style.display = 'none';
+              if (target.nextElementSibling) {
+                (target.nextElementSibling as HTMLElement).style.display = 'block';
+              }
+            }}
+          />
+          <span className="hidden text-2xl sm:text-3xl font-black tracking-tighter text-black uppercase font-['Plus_Jakarta_Sans'] select-none">
             fabsi
           </span>
         </div>

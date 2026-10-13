@@ -294,9 +294,11 @@ export default function App() {
       {/* Player Footer (Clean: Only fabsi and optional Switch Player, NO ADMIN LINKS) */}
       <footer className="bg-white border-t border-zinc-100 py-4 px-4">
         <div className="max-w-md mx-auto flex items-center justify-between text-[11px] text-zinc-400">
-          <span className="font-bold text-black uppercase font-['Plus_Jakarta_Sans'] select-none">
-            fabsi
-          </span>
+          <img
+            src="https://fabsi.co.uk/IMG_20260928_111259.png"
+            alt="fabsi"
+            className="h-5 w-auto max-w-[90px] object-contain select-none opacity-80"
+          />
           {player && (
             <button
               onClick={handleLogout}
