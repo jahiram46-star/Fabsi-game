@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Eye, RotateCcw, Hash } from 'lucide-react';
 import { LevelConfig, LevelResult } from '../types.ts';
 import { sound } from '../utils/sound.ts';
 import confetti from 'canvas-confetti';
@@ -164,85 +163,11 @@ export const PuzzleBoard: React.FC<PuzzleBoardProps> = ({
 
   return (
     <div className="max-w-md mx-auto px-4 py-3 select-none">
-      {/* Title & Collection (Minimalist) */}
-      <div className="text-center mb-3">
+      {/* Title Only */}
+      <div className="text-center mb-4">
         <h2 className="text-xl font-black text-black tracking-tight">
           {level.name}
         </h2>
-        <span className="text-[11px] text-zinc-400 font-medium tracking-wide">
-          {level.category}
-        </span>
-      </div>
-
-      {/* Stats bar (Clean, unboxed, minimal text) */}
-      <div className="bg-zinc-50 border border-zinc-200 rounded-2xl px-4 py-2.5 mb-4 flex items-center justify-between text-xs">
-        <div className="flex items-center gap-5">
-          <div>
-            <span className="text-zinc-400 block text-[10px] uppercase font-bold tracking-wider">
-              Time
-            </span>
-            <span className="font-mono font-bold text-zinc-900 text-sm">
-              {formatTime(seconds)}
-            </span>
-          </div>
-
-          <div>
-            <span className="text-zinc-400 block text-[10px] uppercase font-bold tracking-wider">
-              Moves
-            </span>
-            <span className="font-mono font-bold text-zinc-900 text-sm">
-              {moves}
-            </span>
-          </div>
-
-          <div>
-            <span className="text-zinc-400 block text-[10px] uppercase font-bold tracking-wider">
-              Grid
-            </span>
-            <span className="font-mono font-bold text-zinc-700 text-sm">
-              {level.gridSize}×{level.gridSize}
-            </span>
-          </div>
-        </div>
-
-        {/* Buttons */}
-        <div className="flex items-center gap-1.5">
-          <button
-            onClick={() => setShowNumbers(!showNumbers)}
-            title="Toggle numbers"
-            className={`p-2 rounded-xl border text-xs transition-colors cursor-pointer ${
-              showNumbers
-                ? 'bg-black text-white border-black'
-                : 'bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-100'
-            }`}
-          >
-            <Hash className="w-3.5 h-3.5" />
-          </button>
-
-          <button
-            onClick={() => setIsPeeking(!isPeeking)}
-            onMouseDown={() => setIsPeeking(true)}
-            onMouseUp={() => setIsPeeking(false)}
-            onTouchStart={() => setIsPeeking(true)}
-            onTouchEnd={() => setIsPeeking(false)}
-            title="Preview original"
-            className={`p-2 rounded-xl border text-xs transition-colors cursor-pointer ${
-              isPeeking
-                ? 'bg-black text-white border-black'
-                : 'bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-100'
-            }`}
-          >
-            <Eye className="w-3.5 h-3.5" />
-          </button>
-
-          <button
-            onClick={initializePuzzle}
-            title="Reshuffle"
-            className="p-2 rounded-xl border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-100 transition-colors cursor-pointer"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-          </button>
-        </div>
       </div>
 
       {/* Puzzle Grid */}

@@ -20,7 +20,7 @@ import {
 } from './utils/indexedDB.ts';
 import { ShareDataPayload } from './utils/socialShare.ts';
 import { sound } from './utils/sound.ts';
-import { ChevronLeft, ChevronRight, Grid } from 'lucide-react';
+import { Grid } from 'lucide-react';
 
 export default function App() {
   const checkIsAdmin = (): boolean => {
@@ -297,38 +297,14 @@ export default function App() {
           <LoginScreen onStartGame={handleStartGame} />
         ) : (
           <div className="py-2">
-            {/* Quick Level Navigation Bar */}
-            <div className="max-w-md mx-auto px-4 flex items-center justify-between text-xs text-zinc-500 mb-1">
-              <button
-                disabled={currentLevelIndex === 0}
-                onClick={() => {
-                  sound.playTap();
-                  setCurrentLevelIndex((prev) => Math.max(0, prev - 1));
-                }}
-                className="flex items-center gap-1 disabled:opacity-30 disabled:cursor-not-allowed hover:text-black cursor-pointer font-medium"
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-                <span>Prev</span>
-              </button>
-
+            {/* Centered Level Indicator */}
+            <div className="max-w-md mx-auto px-4 flex items-center justify-center mb-1">
               <button
                 onClick={() => setIsLevelMapOpen(true)}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-mono font-bold transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-mono font-bold transition-colors cursor-pointer text-xs"
               >
                 <Grid className="w-3 h-3 text-zinc-500" />
                 <span>Level {currentLevelIndex + 1} of 100</span>
-              </button>
-
-              <button
-                disabled={currentLevelIndex + 1 >= unlockedLevel || currentLevelIndex + 1 >= LEVELS.length}
-                onClick={() => {
-                  sound.playTap();
-                  setCurrentLevelIndex((prev) => Math.min(LEVELS.length - 1, prev + 1));
-                }}
-                className="flex items-center gap-1 disabled:opacity-30 disabled:cursor-not-allowed hover:text-black cursor-pointer font-medium"
-              >
-                <span>Next</span>
-                <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
 
