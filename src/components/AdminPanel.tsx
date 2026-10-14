@@ -368,7 +368,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToGame }) => {
                     <th className="py-3 px-4">Mobile</th>
                     <th className="py-3 px-4">Score</th>
                     <th className="py-3 px-4">Levels</th>
-                    <th className="py-3 px-4">Submitted Date</th>
+                    <th className="py-3 px-4">Physical Gift</th>
+                    <th className="py-3 px-4">Delivery Address</th>
+                    <th className="py-3 px-4">Date</th>
                     <th className="py-3 px-4">Status</th>
                   </tr>
                 </thead>
@@ -382,8 +384,24 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToGame }) => {
                         {lead.finalScore || 0} pts
                       </td>
                       <td className="py-3 px-4 font-mono">{lead.levelsCompleted || 0} / 100</td>
-                      <td className="py-3 px-4 text-zinc-500">
-                        {new Date(lead.submittedAt).toLocaleString()}
+                      <td className="py-3 px-4">
+                        {lead.giftClaimed ? (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                            🎁 CLAIMED
+                          </span>
+                        ) : (lead.levelsCompleted || 0) >= 100 ? (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-zinc-100 text-zinc-700">
+                            Eligible
+                          </span>
+                        ) : (
+                          <span className="text-zinc-400 text-[11px]">-</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 max-w-[200px] truncate text-zinc-700 text-[11px]">
+                        {lead.deliveryAddress || '-'}
+                      </td>
+                      <td className="py-3 px-4 text-zinc-500 text-[11px]">
+                        {new Date(lead.submittedAt).toLocaleDateString()}
                       </td>
                       <td className="py-3 px-4">
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">

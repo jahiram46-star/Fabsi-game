@@ -3,6 +3,21 @@ export interface PlayerInfo {
   phone: string;
   startedAt: string;
   totalScore: number;
+  completedLevels: number[];
+  giftClaimed?: boolean;
+  deliveryAddress?: string;
+}
+
+export interface UserProfile {
+  id: string; // 'current_user'
+  name: string;
+  phone: string;
+  createdAt: string;
+  totalScore: number; // exactly 10 pts per level, up to 1000 pts
+  completedLevels: number[]; // array of unique level IDs [1, 2, ...]
+  unlockedLevel: number;
+  giftClaimed?: boolean;
+  deliveryAddress?: string;
 }
 
 export interface LevelConfig {
@@ -19,7 +34,7 @@ export interface LevelResult {
   levelId: number;
   moves: number;
   timeSeconds: number;
-  score: number;
+  score: number; // always 10 per level completed
   stars: number;
 }
 
@@ -32,5 +47,7 @@ export interface LeadRecord {
   submittedAt: string;
   finalScore?: number;
   levelsCompleted?: number;
+  giftClaimed?: boolean;
+  deliveryAddress?: string;
   status: 'synced' | 'local_only' | 'pending';
 }

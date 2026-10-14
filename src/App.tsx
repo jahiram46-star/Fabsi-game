@@ -7,32 +7,35 @@ import { GameCompleteModal } from './components/GameCompleteModal.tsx';
 import { ShareModal } from './components/ShareModal.tsx';
 import { ImagePreviewModal } from './components/ImagePreviewModal.tsx';
 import { LevelMapModal } from './components/LevelMapModal.tsx';
+import { UserProfileModal } from './components/UserProfileModal.tsx';
 import { AdminPanel } from './components/AdminPanel.tsx';
 import { LEVELS } from './data/levels.ts';
-import { PlayerInfo, LevelResult, GameView } from './types.ts';
+import { PlayerInfo, UserProfile, LevelResult, GameView } from './types.ts';
 import { submitLeadToGoogleSheet } from './utils/googleSheets.ts';
+import {
+  saveProfileToIndexedDB,
+  getProfileFromIndexedDB,
+  saveLevelProgressToIndexedDB,
+  clearProfileFromIndexedDB,
+} from './utils/indexedDB.ts';
 import { ShareDataPayload } from './utils/socialShare.ts';
 import { sound } from './utils/sound.ts';
 import { ChevronLeft, ChevronRight, Grid } from 'lucide-react';
 
 export default function App() {
-  // Helper to check if current visitor is on admin subdomain or admin path
   const checkIsAdmin = (): boolean => {
     if (typeof window === 'undefined') return false;
     const host = window.location.hostname.toLowerCase();
     const path = window.location.pathname.toLowerCase();
     const hash = window.location.hash.toLowerCase();
     const search = window.location.search.toLowerCase();
-
     const href = window.location.href.toLowerCase();
 
-    // 1. Subdomain check: e.g. admin.fabsi.co.uk
     const isSubdomain =
       host.startsWith('admin.') ||
       host.includes('admin') ||
       href.includes('admin.fabsi.co.uk');
 
-    // 2. Path or query check: /admin, #admin, ?admin=true
     const isPathOrQuery =
       path.startsWith('/admin') ||
       path.includes('/admin') ||
@@ -45,6 +48,7 @@ export default function App() {
   const [isAdminRoute, setIsAdminRoute] = useState<boolean>(checkIsAdmin);
 
   const [player, setPlayer] = useState<PlayerInfo | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(0);
   const [unlockedLevel, setUnlockedLevel] = useState<number>(1);
   const [gameView, setGameView] = useState<GameView>('login');
@@ -53,6 +57,7 @@ export default function App() {
 
   // Modals state
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [sharePayload, setSharePayload] = useState<ShareDataPayload>({
     title: 'fabsi Fashion Puzzle',
   });
@@ -74,31 +79,42 @@ export default function App() {
     };
   }, []);
 
-  // Restore saved player session & progress
+  // Restore saved player profile from IndexedDB on startup
   useEffect(() => {
-    const saved = sessionStorage.getItem('fabsi_active_player');
-    const savedUnlocked = localStorage.getItem('fabsi_unlocked_level');
-    if (savedUnlocked) {
-      setUnlockedLevel(Math.min(100, Math.max(1, parseInt(savedUnlocked, 10))));
-    }
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setPlayer(parsed);
+    getProfileFromIndexedDB().then((savedProfile) => {
+      if (savedProfile) {
+        setUserProfile(savedProfile);
+        setPlayer({
+          name: savedProfile.name,
+          phone: savedProfile.phone,
+          startedAt: savedProfile.createdAt,
+          totalScore: savedProfile.totalScore,
+          completedLevels: savedProfile.completedLevels || [],
+          giftClaimed: savedProfile.giftClaimed,
+          deliveryAddress: savedProfile.deliveryAddress,
+        });
+        setUnlockedLevel(Math.min(100, Math.max(1, savedProfile.unlockedLevel || 1)));
+
+        // Reconstruct results array
+        const reconstructed: LevelResult[] = (savedProfile.completedLevels || []).map((lvlId) => ({
+          levelId: lvlId,
+          score: 10,
+          moves: 12,
+          timeSeconds: 30,
+          stars: 3,
+        }));
+        setLevelResults(reconstructed);
         setGameView('playing');
-      } catch {
-        // ignore
       }
-    }
+    });
   }, []);
 
-  // If in admin route (/admin or #admin), show dedicated Admin Portal
+  // If in admin route (/admin or #admin or admin subdomain), show dedicated Admin Portal
   if (isAdminRoute) {
     return (
       <AdminPanel
         onBackToGame={() => {
           if (typeof window !== 'undefined' && window.location.hostname.startsWith('admin.')) {
-            // Redirect to main domain (e.g. from admin.fabsi.co.uk -> fabsi.co.uk)
             const mainHost = window.location.hostname.replace(/^admin\./, '');
             window.location.href = `${window.location.protocol}//${mainHost}`;
             return;
@@ -114,22 +130,68 @@ export default function App() {
     );
   }
 
-  const handleStartGame = (name: string, phone: string) => {
+  const handleStartGame = (profile: UserProfile) => {
+    setUserProfile(profile);
     const newPlayer: PlayerInfo = {
-      name,
-      phone,
-      startedAt: new Date().toISOString(),
-      totalScore: 0,
+      name: profile.name,
+      phone: profile.phone,
+      startedAt: profile.createdAt,
+      totalScore: profile.totalScore,
+      completedLevels: profile.completedLevels,
+      giftClaimed: profile.giftClaimed,
+      deliveryAddress: profile.deliveryAddress,
     };
     setPlayer(newPlayer);
     setCurrentLevelIndex(0);
+    setUnlockedLevel(profile.unlockedLevel || 1);
     setLevelResults([]);
     setGameView('playing');
-    sessionStorage.setItem('fabsi_active_player', JSON.stringify(newPlayer));
   };
 
-  const handleLevelComplete = (result: LevelResult) => {
+  const handleLevelComplete = async (result: LevelResult) => {
     setLastLevelResult(result);
+
+    // Save individual level result
+    await saveLevelProgressToIndexedDB(result);
+
+    // Rule: Each unique puzzle completed awards exactly 10 score points!
+    // Total 100 puzzles = 1000 points.
+    const currentCompleted = userProfile?.completedLevels ? [...userProfile.completedLevels] : [];
+    if (!currentCompleted.includes(result.levelId)) {
+      currentCompleted.push(result.levelId);
+    }
+
+    const calculatedScore = Math.min(1000, currentCompleted.length * 10);
+    const nextLevelNum = Math.min(100, Math.max(unlockedLevel, result.levelId + 1));
+    setUnlockedLevel(nextLevelNum);
+
+    const updatedProfile: UserProfile = {
+      id: 'current_user',
+      name: player?.name || userProfile?.name || 'Player',
+      phone: player?.phone || userProfile?.phone || '',
+      createdAt: userProfile?.createdAt || new Date().toISOString(),
+      totalScore: calculatedScore,
+      completedLevels: currentCompleted,
+      unlockedLevel: nextLevelNum,
+      giftClaimed: userProfile?.giftClaimed,
+      deliveryAddress: userProfile?.deliveryAddress,
+    };
+
+    setUserProfile(updatedProfile);
+    setPlayer({
+      name: updatedProfile.name,
+      phone: updatedProfile.phone,
+      startedAt: updatedProfile.createdAt,
+      totalScore: calculatedScore,
+      completedLevels: currentCompleted,
+      giftClaimed: updatedProfile.giftClaimed,
+      deliveryAddress: updatedProfile.deliveryAddress,
+    });
+
+    // Save updated profile to IndexedDB
+    await saveProfileToIndexedDB(updatedProfile);
+
+    // Keep level results array updated
     const existingIndex = levelResults.findIndex((r) => r.levelId === result.levelId);
     let updatedResults: LevelResult[];
     if (existingIndex >= 0) {
@@ -140,25 +202,13 @@ export default function App() {
     }
     setLevelResults(updatedResults);
 
-    // Unlock next level (up to 100)
-    const nextLevelNum = Math.min(100, result.levelId + 1);
-    if (nextLevelNum > unlockedLevel) {
-      setUnlockedLevel(nextLevelNum);
-      localStorage.setItem('fabsi_unlocked_level', nextLevelNum.toString());
-    }
-
-    const newTotal = updatedResults.reduce((acc, r) => acc + r.score, 0);
-    if (player) {
-      const updatedPlayer = { ...player, totalScore: newTotal };
-      setPlayer(updatedPlayer);
-      sessionStorage.setItem('fabsi_active_player', JSON.stringify(updatedPlayer));
-
-      // Asynchronously send updated score to Google Sheet
-      submitLeadToGoogleSheet(player.name, player.phone, {
-        finalScore: newTotal,
-        levelsCompleted: updatedResults.length,
-      }).catch(() => {});
-    }
+    // Sync updated score and gift status to Google Sheet
+    submitLeadToGoogleSheet(updatedProfile.name, updatedProfile.phone, {
+      finalScore: calculatedScore,
+      levelsCompleted: currentCompleted.length,
+      giftClaimed: updatedProfile.giftClaimed,
+      deliveryAddress: updatedProfile.deliveryAddress,
+    }).catch(() => {});
 
     setGameView('level_complete');
   };
@@ -183,7 +233,7 @@ export default function App() {
     const currentLvl = LEVELS[currentLevelIndex];
     setSharePayload({
       title: 'fabsi Fashion Puzzle',
-      score: lastLevelResult.score,
+      score: 10,
       levelId: currentLvl.id,
       levelName: currentLvl.name,
       playerName: player.name,
@@ -194,10 +244,9 @@ export default function App() {
 
   const handleOpenShareGame = () => {
     if (!player) return;
-    const totalScore = levelResults.reduce((acc, r) => acc + r.score, 0);
     setSharePayload({
       title: 'fabsi Fashion Puzzle',
-      score: totalScore,
+      score: 1000,
       playerName: player.name,
       isGameComplete: true,
     });
@@ -208,10 +257,12 @@ export default function App() {
     setGameView('playing');
   };
 
-  const handleLogout = () => {
-    sessionStorage.removeItem('fabsi_active_player');
+  const handleLogout = async () => {
+    await clearProfileFromIndexedDB();
     setPlayer(null);
+    setUserProfile(null);
     setCurrentLevelIndex(0);
+    setUnlockedLevel(1);
     setLevelResults([]);
     setLastLevelResult(null);
     setGameView('login');
@@ -223,11 +274,11 @@ export default function App() {
   };
 
   const currentLevel = LEVELS[currentLevelIndex];
-  const totalScore = player ? player.totalScore : 0;
+  const totalScore = userProfile ? userProfile.totalScore : player ? player.totalScore : 0;
 
   return (
     <div className="min-h-screen bg-white text-zinc-900 flex flex-col font-['Plus_Jakarta_Sans',sans-serif]">
-      {/* Player Header: White background with Black 'fabsi' (NO ADMIN BUTTON) */}
+      {/* Player Header: Logo + Player Profile (IndexedDB) + Score (10 pts/level) */}
       <Header
         player={player}
         currentLevel={currentLevelIndex + 1}
@@ -235,6 +286,7 @@ export default function App() {
         score={totalScore}
         onResetGame={player ? handleResetCurrentLevel : undefined}
         onOpenLevelMap={() => setIsLevelMapOpen(true)}
+        onOpenProfile={() => setIsProfileModalOpen(true)}
         soundEnabled={soundEnabled}
         onToggleSound={handleToggleSound}
       />
@@ -291,8 +343,8 @@ export default function App() {
         )}
       </main>
 
-      {/* Player Footer (Clean: Only fabsi and optional Switch Player, NO ADMIN LINKS) */}
-      <footer className="bg-white border-t border-zinc-100 py-4 px-4">
+      {/* Player Footer */}
+      <footer className="bg-white border-t border-zinc-100 py-3.5 px-4">
         <div className="max-w-md mx-auto flex items-center justify-between text-[11px] text-zinc-400">
           <img
             src="https://fabsi.co.uk/IMG_20260928_111259.png"
@@ -301,10 +353,10 @@ export default function App() {
           />
           {player && (
             <button
-              onClick={handleLogout}
-              className="hover:text-black cursor-pointer"
+              onClick={() => setIsProfileModalOpen(true)}
+              className="hover:text-black cursor-pointer font-medium text-zinc-600"
             >
-              Switch Player
+              Profile &amp; Gift Status ({totalScore}/1000 pts)
             </button>
           )}
         </div>
@@ -331,8 +383,29 @@ export default function App() {
             setGameView('playing');
           }}
           onShare={handleOpenShareGame}
+          onOpenClaimGift={() => setIsProfileModalOpen(true)}
         />
       )}
+
+      {/* User Profile & Gift Claiming Modal (IndexedDB) */}
+      <UserProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        profile={userProfile}
+        onProfileUpdated={(updated) => {
+          setUserProfile(updated);
+          setPlayer({
+            name: updated.name,
+            phone: updated.phone,
+            startedAt: updated.createdAt,
+            totalScore: updated.totalScore,
+            completedLevels: updated.completedLevels,
+            giftClaimed: updated.giftClaimed,
+            deliveryAddress: updated.deliveryAddress,
+          });
+        }}
+        onLogout={handleLogout}
+      />
 
       <ShareModal
         isOpen={isShareModalOpen}

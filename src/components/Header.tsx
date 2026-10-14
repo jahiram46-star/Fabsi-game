@@ -1,5 +1,4 @@
-import React from 'react';
-import { Volume2, VolumeX, RefreshCw, Trophy, Grid } from 'lucide-react';
+import { Volume2, VolumeX, RefreshCw, Trophy, Grid, User } from 'lucide-react';
 import { PlayerInfo } from '../types.ts';
 
 interface HeaderProps {
@@ -9,6 +8,7 @@ interface HeaderProps {
   score: number;
   onResetGame?: () => void;
   onOpenLevelMap?: () => void;
+  onOpenProfile?: () => void;
   soundEnabled: boolean;
   onToggleSound: () => void;
 }
@@ -20,6 +20,7 @@ export const Header: React.FC<HeaderProps> = ({
   score,
   onResetGame,
   onOpenLevelMap,
+  onOpenProfile,
   soundEnabled,
   onToggleSound,
 }) => {
@@ -45,13 +46,29 @@ export const Header: React.FC<HeaderProps> = ({
           </span>
         </div>
 
-        {/* Center: Live Level and Score */}
+        {/* Center: Live Level, Score & User Profile */}
         {player && (
-          <div className="flex items-center gap-2 sm:gap-4 text-xs font-medium">
+          <div className="flex items-center gap-2 sm:gap-3 text-xs font-medium">
+            {/* User Profile Badge (IndexedDB) */}
+            {onOpenProfile && (
+              <button
+                onClick={onOpenProfile}
+                title="View Player Profile & Gift Status"
+                className="flex items-center gap-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 px-3 py-1.5 rounded-full transition-colors cursor-pointer"
+              >
+                <div className="w-4 h-4 rounded-full bg-black text-white text-[9px] flex items-center justify-center font-bold">
+                  {player.name.charAt(0).toUpperCase()}
+                </div>
+                <span className="max-w-[70px] sm:max-w-[100px] truncate font-semibold">
+                  {player.name}
+                </span>
+              </button>
+            )}
+
             <button
               onClick={onOpenLevelMap}
               title="Levels"
-              className="flex items-center gap-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 px-3 py-1.5 rounded-full transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 px-3 py-1.5 rounded-full transition-colors cursor-pointer hidden sm:flex"
             >
               <Grid className="w-3.5 h-3.5 text-zinc-600" />
               <span>Level</span>
@@ -63,6 +80,7 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="flex items-center gap-1.5 bg-black text-white px-3 py-1.5 rounded-full font-mono font-bold">
               <Trophy className="w-3.5 h-3.5 text-amber-400" />
               <span>{score}</span>
+              <span className="text-[10px] text-zinc-400 font-sans hidden sm:inline">pts</span>
             </div>
           </div>
         )}

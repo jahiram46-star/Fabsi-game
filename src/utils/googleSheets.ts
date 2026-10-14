@@ -5,7 +5,6 @@ const WEBHOOK_KEY = 'fabsi_google_sheet_webhook';
 
 export function getSavedWebhookUrl(): string {
   if (typeof window === 'undefined') return '';
-  // Check Vite env var first (ideal for Vercel / GitHub deployment)
   const envUrl = import.meta.env?.VITE_GOOGLE_SHEET_WEBHOOK_URL;
   if (envUrl && typeof envUrl === 'string' && envUrl.trim()) {
     return envUrl.trim();
@@ -47,7 +46,12 @@ export function saveLeadToStorage(lead: LeadRecord) {
 export async function submitLeadToGoogleSheet(
   name: string,
   phone: string,
-  meta?: { finalScore?: number; levelsCompleted?: number }
+  meta?: {
+    finalScore?: number;
+    levelsCompleted?: number;
+    giftClaimed?: boolean;
+    deliveryAddress?: string;
+  }
 ): Promise<{ success: boolean; message: string; method: 'webhook' | 'local' }> {
   const leadId = 'lead_' + Date.now();
   const timestamp = new Date().toISOString();
@@ -59,6 +63,8 @@ export async function submitLeadToGoogleSheet(
     submittedAt: timestamp,
     finalScore: meta?.finalScore ?? 0,
     levelsCompleted: meta?.levelsCompleted ?? 0,
+    giftClaimed: meta?.giftClaimed ?? false,
+    deliveryAddress: meta?.deliveryAddress ?? '',
     status: 'pending',
   };
 
@@ -85,6 +91,8 @@ export async function submitLeadToGoogleSheet(
       submittedAt: new Date().toISOString(),
       finalScore: meta?.finalScore ?? 0,
       levelsCompleted: meta?.levelsCompleted ?? 0,
+      giftClaimed: meta?.giftClaimed ? 'YES' : 'NO',
+      deliveryAddress: meta?.deliveryAddress || '',
     };
 
     await fetch(webhookUrl, {
@@ -117,7 +125,7 @@ export async function submitLeadToGoogleSheet(
 }
 
 export function exportLeadsToCSV(leads: LeadRecord[]): string {
-  const headers = ['#', 'Name', 'Phone', 'Date', 'Score', 'Levels Completed', 'Status'];
+  const headers = ['#', 'Name', 'Phone', 'Date', 'Score', 'Levels Completed', 'Gift Claimed', 'Delivery Address', 'Status'];
   const rows = leads.map((l, idx) => [
     idx + 1,
     `"${l.name.replace(/"/g, '""')}"`,
@@ -125,6 +133,8 @@ export function exportLeadsToCSV(leads: LeadRecord[]): string {
     `"${new Date(l.submittedAt).toLocaleString()}"`,
     l.finalScore ?? 0,
     l.levelsCompleted ?? 0,
+    l.giftClaimed ? 'YES' : 'NO',
+    `"${(l.deliveryAddress || '').replace(/"/g, '""')}"`,
     l.status,
   ]);
 

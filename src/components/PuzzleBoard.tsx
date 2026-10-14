@@ -107,10 +107,8 @@ export const PuzzleBoard: React.FC<PuzzleBoardProps> = ({
           stars = 2;
         }
 
-        const baseScore = 1000;
-        const movePenalty = Math.max(0, (currentMoves - 8) * 10);
-        const timePenalty = Math.max(0, currentTime * 2);
-        const finalScore = Math.max(200, baseScore - movePenalty - timePenalty + stars * 100);
+        // Rule: Each completed puzzle awards exactly 10 points (100 puzzles = 1000 total score)
+        const finalScore = 10;
 
         setTimeout(() => {
           onLevelComplete({
