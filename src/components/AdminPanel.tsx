@@ -123,7 +123,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToGame }) => {
             <img
               src="https://pub-fbe8955756a94853a0bd118c51f515ea.r2.dev/IMG_20260928_111259.png"
               alt="fabsi"
-              className="h-9 w-auto max-w-[140px] mx-auto mb-3 object-contain select-none"
+              className="h-11 sm:h-12 w-auto max-w-[170px] mx-auto mb-3 object-contain select-none"
             />
             <h2 className="text-base font-bold text-black tracking-tight font-['Plus_Jakarta_Sans']">
               Admin Portal
@@ -187,7 +187,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToGame }) => {
             <img
               src="https://pub-fbe8955756a94853a0bd118c51f515ea.r2.dev/IMG_20260928_111259.png"
               alt="fabsi"
-              className="h-8 w-auto max-w-[130px] object-contain select-none"
+              className="h-10 sm:h-11 w-auto max-w-[160px] object-contain select-none"
             />
             <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-700">
               Admin Panel

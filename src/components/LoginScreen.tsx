@@ -102,7 +102,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onStartGame }) => {
             <img
               src="https://pub-fbe8955756a94853a0bd118c51f515ea.r2.dev/IMG_20260928_111259.png"
               alt="fabsi"
-              className="h-9 w-auto max-w-[150px] mx-auto mb-2 object-contain select-none"
+              className="h-12 sm:h-14 w-auto max-w-[200px] mx-auto mb-2 object-contain select-none"
             />
             <p className="text-xs text-zinc-500">
               100 Levels Apparel Puzzle
