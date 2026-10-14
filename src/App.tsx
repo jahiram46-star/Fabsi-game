@@ -323,7 +323,7 @@ export default function App() {
       <footer className="bg-white border-t border-zinc-100 py-3.5 px-4">
         <div className="max-w-md mx-auto flex items-center justify-between text-[11px] text-zinc-400">
           <img
-            src="https://fabsi.co.uk/IMG_20260928_111259.png"
+            src="https://pub-fbe8955756a94853a0bd118c51f515ea.r2.dev/IMG_20260928_111259.png"
             alt="fabsi"
             className="h-5 w-auto max-w-[90px] object-contain select-none opacity-80"
           />

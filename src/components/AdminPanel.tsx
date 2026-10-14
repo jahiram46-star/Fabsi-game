@@ -121,7 +121,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToGame }) => {
         <div className="w-full max-w-sm bg-white border border-zinc-200 rounded-3xl p-6 shadow-sm">
           <div className="text-center mb-6">
             <img
-              src="https://fabsi.co.uk/IMG_20260928_111259.png"
+              src="https://pub-fbe8955756a94853a0bd118c51f515ea.r2.dev/IMG_20260928_111259.png"
               alt="fabsi"
               className="h-9 w-auto max-w-[140px] mx-auto mb-3 object-contain select-none"
             />
@@ -185,7 +185,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToGame }) => {
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img
-              src="https://fabsi.co.uk/IMG_20260928_111259.png"
+              src="https://pub-fbe8955756a94853a0bd118c51f515ea.r2.dev/IMG_20260928_111259.png"
               alt="fabsi"
               className="h-8 w-auto max-w-[130px] object-contain select-none"
             />

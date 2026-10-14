@@ -100,7 +100,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onStartGame }) => {
         <div className="bg-white border border-zinc-200 rounded-3xl p-6 sm:p-7 shadow-xs">
           <div className="text-center mb-5">
             <img
-              src="https://fabsi.co.uk/IMG_20260928_111259.png"
+              src="https://pub-fbe8955756a94853a0bd118c51f515ea.r2.dev/IMG_20260928_111259.png"
               alt="fabsi"
               className="h-9 w-auto max-w-[150px] mx-auto mb-2 object-contain select-none"
             />
