@@ -26,13 +26,13 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-zinc-200">
-      <div className="max-w-5xl mx-auto px-4 h-18 sm:h-20 flex items-center justify-between">
-        {/* Brand Logo Image */}
+      <div className="max-w-5xl mx-auto px-4 h-20 sm:h-24 flex items-center justify-between">
+        {/* Brand Logo Image (Enlarged) */}
         <div className="flex items-center gap-3">
           <img
             src="https://pub-fbe8955756a94853a0bd118c51f515ea.r2.dev/IMG_20260928_111259.png"
             alt="fabsi"
-            className="h-11 sm:h-13 md:h-14 w-auto max-w-[190px] sm:max-w-[240px] object-contain select-none transition-all"
+            className="h-14 sm:h-16 md:h-18 w-auto max-w-[240px] sm:max-w-[320px] object-contain select-none transition-all"
             onError={(e) => {
               const target = e.currentTarget;
               target.style.display = 'none';

@@ -93,10 +93,13 @@ export default function App() {
           giftClaimed: savedProfile.giftClaimed,
           deliveryAddress: savedProfile.deliveryAddress,
         });
-        setUnlockedLevel(Math.min(100, Math.max(1, savedProfile.unlockedLevel || 1)));
+        const completed = savedProfile.completedLevels || [];
+        const nextActiveIdx = Math.min(LEVELS.length - 1, completed.length);
+        setCurrentLevelIndex(nextActiveIdx);
+        setUnlockedLevel(Math.min(100, Math.max(1, savedProfile.unlockedLevel || (completed.length + 1))));
 
         // Reconstruct results array
-        const reconstructed: LevelResult[] = (savedProfile.completedLevels || []).map((lvlId) => ({
+        const reconstructed: LevelResult[] = completed.map((lvlId) => ({
           levelId: lvlId,
           score: 10,
           moves: 12,
@@ -104,7 +107,11 @@ export default function App() {
           stars: 3,
         }));
         setLevelResults(reconstructed);
-        setGameView('playing');
+        if (completed.length >= 100) {
+          setGameView('game_complete');
+        } else {
+          setGameView('playing');
+        }
       }
     });
   }, []);
@@ -132,20 +139,26 @@ export default function App() {
 
   const handleStartGame = (profile: UserProfile) => {
     setUserProfile(profile);
+    const completed = profile.completedLevels || [];
     const newPlayer: PlayerInfo = {
       name: profile.name,
       phone: profile.phone,
       startedAt: profile.createdAt,
       totalScore: profile.totalScore,
-      completedLevels: profile.completedLevels,
+      completedLevels: completed,
       giftClaimed: profile.giftClaimed,
       deliveryAddress: profile.deliveryAddress,
     };
     setPlayer(newPlayer);
-    setCurrentLevelIndex(0);
-    setUnlockedLevel(profile.unlockedLevel || 1);
+    const activeIdx = Math.min(LEVELS.length - 1, completed.length);
+    setCurrentLevelIndex(activeIdx);
+    setUnlockedLevel(Math.min(100, Math.max(1, profile.unlockedLevel || (completed.length + 1))));
     setLevelResults([]);
-    setGameView('playing');
+    if (completed.length >= 100) {
+      setGameView('game_complete');
+    } else {
+      setGameView('playing');
+    }
   };
 
   const handleLevelComplete = async (result: LevelResult) => {
@@ -223,6 +236,11 @@ export default function App() {
   };
 
   const handleSelectLevelFromMap = (levelId: number) => {
+    const completed = userProfile?.completedLevels || player?.completedLevels || [];
+    // A completed level cannot be played again!
+    if (completed.includes(levelId)) {
+      return;
+    }
     const targetIdx = Math.max(0, Math.min(LEVELS.length - 1, levelId - 1));
     setCurrentLevelIndex(targetIdx);
     setGameView('playing');
@@ -400,6 +418,7 @@ export default function App() {
         onClose={() => setIsLevelMapOpen(false)}
         levels={LEVELS}
         currentLevelId={currentLevel.id}
+        completedLevels={userProfile?.completedLevels || player?.completedLevels || []}
         unlockedLevel={unlockedLevel}
         results={levelResults}
         onSelectLevel={handleSelectLevelFromMap}
